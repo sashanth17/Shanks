@@ -1,0 +1,93 @@
+{
+  "name": "shanks",
+  "publisher": "shanks-team",
+  "displayName": "Shanks",
+  "description": "Voice-Driven AI Coding Assistant",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onView:shanks.chatView",
+    "onCommand:shanks.openPanel"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "shanks.openPanel",
+        "title": "Open Shanks Assistant"
+      }
+    ],
+    "viewsContainers": {
+      "secondarySideBar": [
+        {
+          "id": "shanks-container",
+          "title": "Shanks",
+          "icon": "$(mic)"
+        }
+      ]
+    },
+    "views": {
+      "shanks-container": [
+        {
+          "type": "webview",
+          "id": "shanks.chatView",
+          "name": "Shanks Assistant"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Shanks",
+      "properties": {
+        "shanks.openRouterApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenRouter API Key"
+        },
+        "shanks.openRouterModel": {
+          "type": "string",
+          "default": "openai/gpt-4o-mini",
+          "description": "OpenRouter Model ID"
+        },
+        "shanks.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Google Gemini API Key (Optional)"
+        },
+        "shanks.deepgramApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Deepgram API Key for real-time STT and TTS"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "lint": "eslint src --ext ts",
+    "compile-css": "npx tailwindcss -i ./src/webview/style.css -o ./dist/webview.css",
+    "watch-css": "npx tailwindcss -i ./src/webview/style.css -o ./dist/webview.css --watch"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/node": "18.x",
+    "typescript": "^5.3.3",
+    "esbuild": "^0.19.11",
+    "tailwindcss": "^3.4.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.33"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@google/generative-ai": "^0.2.1"
+  }
+}
