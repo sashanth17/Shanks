@@ -95,9 +95,21 @@ export const App: React.FC = () => {
                     }
                     break;
 
+                case 'VOICE_URL':
+                    // Browser tab was opened by extension
+                    break;
+
+                case 'VOICE_STATE':
+                    setVoiceState(msg.state);
+                    if (msg.state !== 'listening') setPartialTranscript('');
+                    break;
+
+                case 'VOICE_TRANSCRIPT':
+                    setPartialTranscript(msg.text);
+                    break;
+
                 case 'DEEPGRAM_API_KEY':
                     setDeepgramKeyReady(true);
-                    _initVoiceController(msg.apiKey);
                     break;
             }
         };
@@ -106,80 +118,28 @@ export const App: React.FC = () => {
         return () => window.removeEventListener('message', handleMessage);
     }, [voiceModeEnabled]);
 
-    // ─── VoiceController Initialization ──────────────────────────────────────
-    const _initVoiceController = useCallback((apiKey: string) => {
-        if (voiceControllerRef.current) {
-            voiceControllerRef.current.stop();
-        }
-
-        voiceControllerRef.current = new VoiceController(apiKey, {
-            onFinalTranscript: (text) => {
-                setPartialTranscript('');
-                const userMsg: Message = {
-                    id: Date.now().toString(),
-                    role: 'user',
-                    text,
-                    timestamp: Date.now(),
-                };
-                setMessages((prev) => [...prev, userMsg]);
-                voiceControllerRef.current?.setAIProcessing();
-                vscode.postMessage({ type: 'USER_MESSAGE', payload: userMsg });
-            },
-            onPartialTranscript: (text) => {
-                setPartialTranscript(text);
-            },
-            onStateChange: (state) => {
-                setVoiceState(state);
-                if (state !== 'listening') setPartialTranscript('');
-            },
-            onError: (message) => {
-                // Separate mic permission errors from general errors
-                if (message.toLowerCase().includes('permission') ||
-                    message.toLowerCase().includes('denied') ||
-                    message.toLowerCase().includes('microphone')) {
-                    setMicPermissionError(message);
-                    setVoiceState('idle');
-                } else {
-                    setMessages((prev) => [
-                        ...prev,
-                        { id: Date.now().toString(), role: 'assistant', text: `⚠️ ${message}`, timestamp: Date.now() },
-                    ]);
-                    setVoiceState('idle');
-                }
-            },
-        });
-    }, []);
+    // ─── Voice Handlers (Browser Split) ──────────────────────────────────────
+    // Local VoiceController is disabled in favor of browser-based capture
+    // but we keep the UI state logic for visual feedback.
 
     // ─── Voice Toggle ─────────────────────────────────────────────────────────
     const handleVoiceModeToggle = () => {
         const turning_on = !voiceModeEnabled;
         setVoiceModeEnabled(turning_on);
-        setMicPermissionError(null); // clear any previous error on toggle
+        setMicPermissionError(null);
 
         if (turning_on) {
-            if (!deepgramKeyReady) {
-                vscode.postMessage({ type: 'REQUEST_DEEPGRAM_KEY' });
-            } else if (voiceControllerRef.current) {
-                voiceControllerRef.current.start();
-            }
+            setVoiceState('listening');
+            vscode.postMessage({ type: 'REQUEST_VOICE_URL' });
         } else {
-            voiceControllerRef.current?.stop();
             setVoiceState('idle');
             setPartialTranscript('');
-            setMicPermissionError(null);
         }
     };
 
-    // Start listening once key is ready and voice mode is enabled
-    useEffect(() => {
-        if (deepgramKeyReady && voiceModeEnabled && voiceControllerRef.current) {
-            voiceControllerRef.current.start();
-        }
-    }, [deepgramKeyReady, voiceModeEnabled]);
-
     // Cleanup on unmount
     useEffect(() => {
-        return () => { voiceControllerRef.current?.stop(); };
+        return () => { /* no-op */ };
     }, []);
 
     // ─── Chat Handlers ────────────────────────────────────────────────────────
@@ -324,18 +284,26 @@ export const App: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Partial transcript / last AI reply */}
-                            <div className="w-full max-w-xs text-center min-h-[4rem] flex items-center justify-center">
-                                {partialTranscript ? (
-                                    <p className="text-sm text-blue-300/70 italic leading-relaxed">{partialTranscript}…</p>
-                                ) : messages.length > 0 && messages[messages.length - 1].role === 'assistant' ? (
-                                    <p className="text-sm font-light text-white/40 leading-relaxed line-clamp-3">
-                                        {messages[messages.length - 1].text}
-                                    </p>
+                            {/* Transcript / AI Response Overlay */}
+                            <div className="w-full max-w-sm px-4 text-center min-h-[6rem] flex flex-col items-center justify-center gap-2">
+                                {voiceState === 'ai_processing' || voiceState === 'speaking' ? (
+                                    <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                        <p className="text-xs text-white/30 uppercase tracking-widest font-semibold">Response</p>
+                                        <p className="text-sm font-medium text-white/90 leading-relaxed line-clamp-4">
+                                            {messages.length > 0 && messages[messages.length - 1].role === 'assistant' 
+                                                ? messages[messages.length - 1].text 
+                                                : 'Generating…'}
+                                        </p>
+                                    </div>
+                                ) : partialTranscript ? (
+                                    <div className="animate-in fade-in duration-300">
+                                        <p className="text-base text-blue-300/80 italic leading-snug">"{partialTranscript}…"</p>
+                                    </div>
                                 ) : (
-                                    <p className="text-xs text-white/20 uppercase tracking-widest">
-                                        {voiceState === 'idle' ? 'Tap the orb to begin' : ''}
-                                    </p>
+                                    <div className="space-y-2 opacity-20">
+                                        <p className="text-xs uppercase tracking-[0.2em]">Ready</p>
+                                        <p className="text-[10px] text-white/50">{voiceState === 'idle' ? 'Tap the orb to begin' : 'Speak now'}</p>
+                                    </div>
                                 )}
                             </div>
                         </>

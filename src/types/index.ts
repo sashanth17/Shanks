@@ -33,7 +33,10 @@ export type ExtensionMessage =
     | { type: 'AI_RESPONSE_END'; id: string; fullText: string }
     | { type: 'ERROR'; message: string }
     | { type: 'DEEPGRAM_API_KEY'; apiKey: string }
-    | { type: 'SPEAK_TEXT'; text: string };
+    | { type: 'SPEAK_TEXT'; text: string }
+    | { type: 'VOICE_URL'; url: string }
+    | { type: 'VOICE_STATE'; state: VoiceState }
+    | { type: 'VOICE_TRANSCRIPT'; text: string };
 
 /**
  * Messages sent FROM the Webview TO the Extension Host.
@@ -42,7 +45,8 @@ export type WebviewMessage =
     | { type: 'USER_MESSAGE'; payload: Message }
     | { type: 'VOICE_TRANSCRIPT'; text: string }
     | { type: 'MODE_CHANGE'; mode: InteractionMode }
-    | { type: 'REQUEST_DEEPGRAM_KEY' };
+    | { type: 'REQUEST_DEEPGRAM_KEY' }
+    | { type: 'REQUEST_VOICE_URL' };
 
 /** Voice pipeline state reported by the VoiceController to the UI. */
 export type VoiceState = 'idle' | 'listening' | 'ai_processing' | 'speaking';

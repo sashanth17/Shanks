@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample HTML</title>
+</head> 
+<body>
+    <h1>Welcome to Sample HTML</h1>
+    <p>This is a sample HTML file to demonstrate basic structure and elements.</p>
+    <ul>
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+    </ul>
+    <a href="https://www.example.com">Visit Example.com</a>
+    <script>
+        let video =navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                console.log("Camera access granted.");
+            })
+            .catch(function(error) {
+                console.error("Camera access denied:", error);
+            });     
+        console.log("This is a sample script.");
+    </script>
+</body>
+</html> 

@@ -38,47 +38,28 @@ export class DeepgramStreamingSTT implements ISpeechSTT {
     }
 
     public async start(): Promise<void> {
-        // Request microphone access — must be in a secure context (https or localhost).
+        // Validation
+        if (!this._apiKey || this._apiKey.trim().length < 10) {
+            console.error('[DeepgramSTT] Invalid API Key provided:', this._apiKey);
+            throw new Error('Invalid Deepgram API Key. Please check your settings.');
+        }
+
+        const cleanKey = this._apiKey.trim();
+
+        // Request microphone access
         try {
+            console.log('[DeepgramSTT] Requesting microphone access...');
             this._stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            console.log('[DeepgramSTT] Microphone access granted.');
         } catch (err: any) {
-            // Surface a clear, actionable error instead of the raw browser message.
+            console.error('[DeepgramSTT] Microphone access failed:', err);
             if (err?.name === 'NotAllowedError' || err?.name === 'PermissionDeniedError') {
-                throw new Error(
-                    'Microphone permission denied. ' +
-                    'On macOS: open System Settings → Privacy & Security → Microphone → enable Visual Studio Code. ' +
-                    'Then restart VS Code and try again.'
-                );
-            }
-            if (err?.name === 'NotFoundError') {
-                throw new Error('No microphone found. Please connect a microphone and try again.');
-            }
-            if (err?.name === 'NotSupportedError') {
-                throw new Error('Microphone not supported in this environment (requires a secure context).');
+                throw new Error('Microphone permission denied. Please enable it in browser settings.');
             }
             throw new Error(`Microphone error: ${err?.message ?? err}`);
         }
 
-        // Open Deepgram WebSocket
-        this._socket = new WebSocket(this._endpoint, ['token', this._apiKey]);
-        this._socket.binaryType = 'arraybuffer';
-
-        this._socket.onopen = () => {
-            this._emit('connected');
-            this._startRecorder();
-        };
-
-        this._socket.onmessage = (event) => {
-            this._handleDeepgramMessage(event.data);
-        };
-
-        this._socket.onerror = () => {
-            this._emit('error', new Error('Deepgram WebSocket error. Check your API key and network connection.'));
-        };
-
-        this._socket.onclose = () => {
-            this._emit('disconnected');
-        };
+        this._socket = this._createSocket(cleanKey);
     }
 
     public stop(): void {
@@ -100,6 +81,62 @@ export class DeepgramStreamingSTT implements ISpeechSTT {
 
     // ─── Internal ──────────────────────────────────────────────────────────────
 
+    private _createSocket(apiKey: string): WebSocket {
+        const cleanKey = apiKey.trim();
+
+        if (!cleanKey.startsWith('dg-')) {
+            console.warn('[DeepgramSTT] ⚠️ WARNING: Your API key does not start with "dg-". Make sure you copied the correct key from the Deepgram dashboard.');
+        }
+
+        console.log('[DeepgramSTT] Browser online status:', navigator.onLine);
+
+        const params = new URLSearchParams({
+            model: 'nova-2',
+            interim_results: 'true',
+            smart_format: 'true',
+            punctuate: 'true',
+            endpointing: '500'
+        });
+
+        const url = `wss://api.deepgram.com/v1/listen?${params.toString()}`;
+        console.log('[DeepgramSTT] Connecting to:', url);
+
+        try {
+            const socket = new WebSocket(url, ['token', cleanKey]);
+            socket.binaryType = 'arraybuffer';
+
+            socket.onopen = () => {
+                console.log('[DeepgramSTT] WebSocket OPEN successfully. ReadyState:', socket.readyState);
+                this._emit('connected');
+                this._startRecorder();
+            };
+
+            socket.onmessage = (event) => {
+                this._handleDeepgramMessage(event.data);
+            };
+
+            socket.onerror = (err) => {
+                console.error('[DeepgramSTT] WebSocket error event:', err);
+                this._emit('error', new Error('Deepgram connection failed. Please check your API key and network.'));
+            };
+
+            socket.onclose = (ev) => {
+                console.log(`[DeepgramSTT] WebSocket closed. Code: ${ev.code}, Reason: ${ev.reason || '(no reason given)'}`);
+                if (ev.code === 4003) {
+                    console.error('[DeepgramSTT] Authentication failed (4003). Check your key.');
+                } else if (ev.code === 1006) {
+                    console.error('[DeepgramSTT] Connection failed before handshake (1006). This often means the key is invalid or your network/firewall is blocking the request.');
+                }
+                this._emit('disconnected');
+            };
+
+            return socket;
+        } catch (err) {
+            console.error('[DeepgramSTT] Sync error creating WebSocket:', err);
+            throw err;
+        }
+    }
+
     private _startRecorder(): void {
         if (!this._stream) return;
 
@@ -110,17 +147,21 @@ export class DeepgramStreamingSTT implements ISpeechSTT {
 
         this._mediaRecorder = new MediaRecorder(this._stream, { mimeType });
 
-        this._mediaRecorder.ondataavailable = (event) => {
+        this._mediaRecorder.ondataavailable = async (event) => {
             if (
                 event.data.size > 0 &&
                 this._socket?.readyState === WebSocket.OPEN
             ) {
-                this._socket.send(event.data);
+                const buffer = await event.data.arrayBuffer();
+                console.log(`[DeepgramSTT] Sending audio chunk: ${buffer.byteLength} bytes`);
+                this._socket.send(buffer);
+            } else if (event.data.size === 0) {
+                console.warn('[DeepgramSTT] Ignoring empty audio chunk.');
             }
         };
 
-        // 20ms chunks — low latency, Deepgram recommended chunk size
-        this._mediaRecorder.start(20);
+        // 100ms chunks — more stable for some browsers/networks
+        this._mediaRecorder.start(100);
     }
 
     private _handleDeepgramMessage(raw: string): void {

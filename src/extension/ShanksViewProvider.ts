@@ -2,14 +2,20 @@ import * as vscode from 'vscode';
 import { OpenRouterService } from '../services/openrouter';
 import { IAIClient, Message, ChatMessage, WebviewMessage, ExtensionMessage } from '../types';
 import { Logger } from './logger';
+import { VoiceServer } from './voiceServer';
 
 export class ShanksViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'shanks.chatView';
     private _view?: vscode.WebviewView;
     private _aiClient?: IAIClient;
     private _history: ChatMessage[] = [];
+    private _voiceServer?: VoiceServer;
 
     constructor(private readonly _extensionUri: vscode.Uri) { }
+
+    public setVoiceServer(server: VoiceServer) {
+        this._voiceServer = server;
+    }
 
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
@@ -43,11 +49,39 @@ export class ShanksViewProvider implements vscode.WebviewViewProvider {
                 case 'MODE_CHANGE':
                     Logger.info(`[ShanksViewProvider] Mode changed to: ${data.mode}`);
                     break;
+                case 'REQUEST_VOICE_URL':
+                    this._sendVoiceUrl();
+                    break;
                 case 'REQUEST_DEEPGRAM_KEY':
                     await this._handleDeepgramKeyRequest();
                     break;
             }
         });
+    }
+
+    public handleTranscript(text: string, isFinal: boolean) {
+        this._postMessage({ type: 'VOICE_TRANSCRIPT', text });
+        
+        if (isFinal) {
+            this._handleMessage({
+                id: Date.now().toString(),
+                role: 'user',
+                text,
+                timestamp: Date.now()
+            });
+        }
+    }
+
+    public handleVoiceState(state: string) {
+        this._postMessage({ type: 'VOICE_STATE', state: state as any });
+    }
+
+    private _sendVoiceUrl(): void {
+        const url = this._voiceServer?.url;
+        if (!url) return;
+        Logger.info(`[ShanksViewProvider] Opening voice UI at: ${url}`);
+        vscode.env.openExternal(vscode.Uri.parse(url));
+        this._postMessage({ type: 'VOICE_URL', url });
     }
 
     private async _handleDeepgramKeyRequest() {
@@ -108,12 +142,14 @@ export class ShanksViewProvider implements vscode.WebviewViewProvider {
             Logger.info(`[ShanksViewProvider] Sending message to AI (id=${assistantMessageId}): "${userMessage.text.slice(0, 60)}..."`);
 
             this._postMessage({ type: 'AI_RESPONSE_START', id: assistantMessageId });
+            this._voiceServer?.broadcast({ type: 'AI_START', id: assistantMessageId });
 
             const fullText = await this._aiClient.generateStreamingResponse(
                 userMessage.text,
                 this._history,
                 (chunk) => {
                     this._postMessage({ type: 'AI_RESPONSE_CHUNK', id: assistantMessageId, chunk });
+                    this._voiceServer?.broadcast({ type: 'AI_CHUNK', id: assistantMessageId, chunk });
                 }
             );
 
@@ -122,6 +158,7 @@ export class ShanksViewProvider implements vscode.WebviewViewProvider {
 
             Logger.info(`[ShanksViewProvider] AI response complete (id=${assistantMessageId}), ${fullText.length} chars.`);
             this._postMessage({ type: 'AI_RESPONSE_END', id: assistantMessageId, fullText });
+            this._voiceServer?.broadcast({ type: 'AI_END', id: assistantMessageId, fullText });
 
         } catch (error: any) {
             Logger.error('[ShanksViewProvider] AI request failed.', error);
