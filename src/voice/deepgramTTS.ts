@@ -20,7 +20,8 @@ export class DeepgramStreamingTTS implements ISpeechTTS {
     private _apiKey: string;
     private _model: string;
     private _audioCtx: AudioContext | null = null;
-    private _currentSource: AudioBufferSourceNode | null = null;
+    private _activeSources: Set<AudioBufferSourceNode> = new Set();
+    private _nextStartTime: number = 0;
     private _listeners: TTSEventMap = { start: [], end: [], error: [] };
 
     private readonly _endpoint = 'https://api.deepgram.com/v1/speak';
@@ -61,21 +62,25 @@ export class DeepgramStreamingTTS implements ISpeechTTS {
                 const arrayBuffer = await response.arrayBuffer();
                 const audioBuffer = await this._audioCtx.decodeAudioData(arrayBuffer);
 
-                // Play — stop any previous audio first
-                this.stop();
-
+                // Queue playback seamlessly
+                const startTime = Math.max(this._audioCtx.currentTime, this._nextStartTime);
+                
                 const source = this._audioCtx.createBufferSource();
                 source.buffer = audioBuffer;
                 source.connect(this._audioCtx.destination);
 
                 source.onended = () => {
-                    this._currentSource = null;
-                    this._emit('end');
+                    this._activeSources.delete(source);
+                    if (this._activeSources.size === 0) {
+                        this._emit('end');
+                        this._nextStartTime = 0;
+                    }
                     resolve();
                 };
 
-                this._currentSource = source;
-                source.start(0);
+                this._activeSources.add(source);
+                source.start(startTime);
+                this._nextStartTime = startTime + audioBuffer.duration;
 
             } catch (error) {
                 const err = error instanceof Error ? error : new Error(String(error));
@@ -86,10 +91,11 @@ export class DeepgramStreamingTTS implements ISpeechTTS {
     }
 
     public stop(): void {
-        if (this._currentSource) {
-            try { this._currentSource.stop(); } catch { }
-            this._currentSource = null;
-        }
+        this._activeSources.forEach(source => {
+            try { source.stop(); } catch { }
+        });
+        this._activeSources.clear();
+        this._nextStartTime = 0;
     }
 
     // ─── Event Emitter ─────────────────────────────────────────────────────────

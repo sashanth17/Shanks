@@ -33,6 +33,8 @@ export class VoiceController {
     private _callbacks: VoiceControllerCallbacks;
     private _state: VoiceState = 'idle';
     private _active = false;
+    private _sentenceBuffer = '';
+    private _speakPromises: Promise<void>[] = [];
 
     constructor(apiKey: string, callbacks: VoiceControllerCallbacks) {
         this._apiKey = apiKey;
@@ -58,7 +60,52 @@ export class VoiceController {
         this._setState('idle');
     }
 
-    /** Called after AI finishes responding — speaks the text, then returns to listening. */
+    /** Appends chunk and speaks complete sentences immediately. */
+    public feedPipelinedAudio(chunk: string): void {
+        if (!this._active) return;
+        this._setState('speaking');
+        this._stt.stop();
+        
+        this._sentenceBuffer += chunk;
+        
+        // Find sentence boundaries (e.g. '.', '?', '!' followed by whitespace or at end)
+        let match;
+        const sentenceRegex = /([\s\S]*?[.?!]+[\s\n]+)/;
+        
+        while ((match = this._sentenceBuffer.match(sentenceRegex))) {
+            const sentence = match[1];
+            this._sentenceBuffer = this._sentenceBuffer.slice(sentence.length);
+            if (sentence.trim().length > 0) {
+                const p = this._tts.speak(sentence.trim());
+                this._speakPromises.push(p);
+            }
+        }
+    }
+
+    /** Called when AI finishes to flush remainder buffer and wait for audio to finish. */
+    public async finishPipelinedAudio(): Promise<void> {
+        if (!this._active) return;
+        
+        const remainder = this._sentenceBuffer.trim();
+        if (remainder.length > 0) {
+            const p = this._tts.speak(remainder);
+            this._speakPromises.push(p);
+        }
+        this._sentenceBuffer = '';
+        
+        // Wait for all scheduled sentences to finish playing
+        try {
+            await Promise.all(this._speakPromises);
+        } catch {}
+        
+        this._speakPromises = [];
+        
+        if (this._active) {
+            await this._startListening();
+        }
+    }
+
+    /** Legacy method: block and speak the full string. */
     public async speakAndReturn(text: string): Promise<void> {
         if (!this._active) return;
         this._setState('speaking');
@@ -66,7 +113,6 @@ export class VoiceController {
         try {
             await this._tts.speak(text);
         } catch {
-            // TTS error already emitted
         }
         if (this._active) {
             await this._startListening();

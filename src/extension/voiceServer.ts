@@ -204,7 +204,7 @@ export class VoiceServer {
     </div>
   </div>
 
-  <div id="transcript">Waiting for microphone…</div>
+  <div id="transcript">Click the Above orb to get started</div>
   <div id="ai-response"></div>
   <div id="error-banner"></div>
 

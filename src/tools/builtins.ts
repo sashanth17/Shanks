@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { Logger } from '../extension/logger';
 import { registry } from './registry';
+import { PythonServerManager } from '../extension/pythonServer';
 
 /**
  * T5 — Built-in Tool Stubs
@@ -75,18 +76,38 @@ registry.register(
 registry.register(
     {
         name: 'searchWorkspace',
-        description: 'Search the workspace for text matching a query string.',
+        description: 'Semantic vector search the workspace for specific code logic or text contexts.',
         inputSchema: {
             type: 'object',
             properties: {
-                query: { type: 'string', description: 'Text or regex pattern to search for.' }
+                query: { type: 'string', description: 'Natural language representation of structural query logic needed to search.' }
             },
             required: ['query']
         }
     },
     async (input) => {
         Logger.info(`[Tool:searchWorkspace] query=${input.query}`);
-        return { success: false, output: null, error: 'searchWorkspace is not yet fully implemented.' };
+        try {
+            const workspaceId = vscode.workspace.name || "default-workspace";
+            const payload = {
+                action: "search_codebase",
+                workspace_id: workspaceId,
+                query: input.query,
+                limit: 5  // Keep it tight to save context window
+            };
+            const result = await PythonServerManager.getInstance().sendRequest(payload);
+            
+            if (result && result.results && result.results.length > 0) {
+                const formatted = result.results.map((r: any) => 
+                    `[File: ${r.file_path}:${r.start_line}-${r.end_line}]\n[Scope: ${r.scope} | Type: ${r.chunk_type}]\nPreview:\n${r.preview}...`
+                ).join("\n\n");
+                return { success: true, output: formatted };
+            }
+            return { success: true, output: "No semantic contextual results found for this query in the workspace." };
+        } catch(e: any) {
+            Logger.error(`[Tool:searchWorkspace] VectorDB failed:`, e);
+            return { success: false, output: null, error: e.message };
+        }
     }
 );
 

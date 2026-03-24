@@ -1,0 +1,108 @@
+[2026-03-23T12:19:26.193Z] Initial configured pythonPath: undefined
+[2026-03-23T12:19:26.194Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:19:26.194Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:19:26.194Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T12:19:28.045Z] STDOUT: SERVER_READY:54578
+
+[2026-03-23T12:19:28.046Z] Server ready on TCP port 54578
+[2026-03-23T12:20:31.952Z] Initial configured pythonPath: undefined
+[2026-03-23T12:20:31.952Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:20:31.952Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:20:31.952Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T12:20:32.810Z] STDOUT: SERVER_READY:54672
+
+[2026-03-23T12:20:32.810Z] Server ready on TCP port 54672
+[2026-03-23T12:24:54.451Z] Initial configured pythonPath: undefined
+[2026-03-23T12:24:54.453Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:24:54.453Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:24:54.453Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T12:24:55.957Z] STDOUT: SERVER_READY:54739
+
+[2026-03-23T12:24:55.957Z] Server ready on TCP port 54739
+[2026-03-23T12:29:34.131Z] Initial configured pythonPath: undefined
+[2026-03-23T12:29:34.131Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:29:34.131Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:29:34.131Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T12:29:35.560Z] STDOUT: SERVER_READY:54863
+
+[2026-03-23T12:29:35.560Z] Server ready on TCP port 54863
+[2026-03-23T12:47:19.993Z] Initial configured pythonPath: undefined
+[2026-03-23T12:47:19.994Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:47:19.994Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:47:19.994Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T12:47:21.551Z] STDOUT: SERVER_READY:55076
+
+[2026-03-23T12:47:21.551Z] Server ready on TCP port 55076
+[2026-03-23T12:47:32.599Z] Initial configured pythonPath: undefined
+[2026-03-23T12:47:32.600Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:47:32.600Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:47:32.600Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T12:47:33.742Z] STDOUT: SERVER_READY:55132
+
+[2026-03-23T12:47:33.742Z] Server ready on TCP port 55132
+[2026-03-23T12:52:35.325Z] Initial configured pythonPath: undefined
+[2026-03-23T12:52:35.326Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:52:35.326Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:52:35.326Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T12:52:36.617Z] STDOUT: SERVER_READY:55302
+
+[2026-03-23T12:52:36.617Z] Server ready on TCP port 55302
+[2026-03-23T12:53:47.282Z] Initial configured pythonPath: undefined
+[2026-03-23T12:53:47.283Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:53:47.283Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:53:47.283Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T12:53:48.702Z] STDOUT: SERVER_READY:55401
+
+[2026-03-23T12:53:48.702Z] Server ready on TCP port 55401
+[2026-03-23T12:58:18.390Z] Initial configured pythonPath: undefined
+[2026-03-23T12:58:18.392Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:58:18.392Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T12:58:18.392Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T12:58:19.453Z] STDOUT: SERVER_READY:55484
+
+[2026-03-23T12:58:19.453Z] Server ready on TCP port 55484
+[2026-03-23T13:21:01.462Z] Initial configured pythonPath: undefined
+[2026-03-23T13:21:01.462Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T13:21:01.462Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T13:21:01.463Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T13:21:02.882Z] STDOUT: SERVER_READY:55644
+
+[2026-03-23T13:21:02.882Z] Server ready on TCP port 55644
+[2026-03-23T13:21:02.883Z] STDERR: [IDE Bridge] VS Code Frontend Daemon Attached successfully.
+
+[2026-03-23T14:53:35.776Z] Initial configured pythonPath: undefined
+[2026-03-23T14:53:35.777Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T14:53:35.777Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T14:53:35.777Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T14:53:36.857Z] STDOUT: SERVER_READY:56382
+
+[2026-03-23T14:53:36.857Z] Server ready on TCP port 56382
+[2026-03-23T14:53:36.860Z] STDERR: [IDE Bridge] VS Code Frontend Daemon Attached successfully.
+
+[2026-03-23T14:53:59.087Z] Initial configured pythonPath: undefined
+[2026-03-23T14:53:59.088Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T14:53:59.088Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T14:53:59.088Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T14:54:01.504Z] STDOUT: SERVER_READY:56430
+
+[2026-03-23T14:54:01.504Z] Server ready on TCP port 56430
+[2026-03-23T14:54:01.514Z] STDERR: [IDE Bridge] VS Code Frontend Daemon Attached successfully.
+
+[2026-03-23T15:03:01.735Z] Initial configured pythonPath: undefined
+[2026-03-23T15:03:01.736Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T15:03:01.736Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-23T15:03:01.736Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-23T15:03:02.762Z] STDOUT: SERVER_READY:56613
+
+[2026-03-23T15:03:02.762Z] Server ready on TCP port 56613
+[2026-03-23T15:03:02.766Z] STDERR: [IDE Bridge] VS Code Frontend Daemon Attached successfully.
+
+[2026-03-24T04:02:39.778Z] Initial configured pythonPath: undefined
+[2026-03-24T04:02:39.778Z] Checking venv path: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-24T04:02:39.778Z] Auto-detected virtual environment at /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3
+[2026-03-24T04:02:39.779Z] Spawning: /Users/sashanth/Documents/VoiceIde/src/python/venv/bin/python3 /Users/sashanth/Documents/VoiceIde/src/python/server.py (cwd: /Users/sashanth/Documents/VoiceIde/src/python)
+[2026-03-24T04:02:42.317Z] STDOUT: SERVER_READY:57033
+
+[2026-03-24T04:02:42.318Z] Server ready on TCP port 57033
+[2026-03-24T04:02:42.414Z] STDERR: [IDE Bridge] VS Code Frontend Daemon Attached successfully.
+

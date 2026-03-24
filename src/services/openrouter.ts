@@ -1,12 +1,38 @@
 import { IAIClient, ChatMessage } from "../types";
+import * as net from "net";
+import * as vscode from "vscode";
+import { PythonServerManager } from "../extension/pythonServer";
 
 export class OpenRouterService implements IAIClient {
     private _apiKey: string;
     private _model: string;
+    private _socket: net.Socket | null = null;
+    private _connectingPromise: Promise<void> | null = null;
 
     constructor(apiKey: string, model: string = "google/gemini-2.0-flash-001") {
         this._apiKey = apiKey;
         this._model = model;
+    }
+
+    private async _connectSocket(): Promise<void> {
+        if (this._connectingPromise) return this._connectingPromise;
+        
+        this._connectingPromise = new Promise(async (resolve, reject) => {
+            try {
+                this._socket = await PythonServerManager.getInstance().createSocket();
+                console.log(`Connected to Python OpenRouter service`);
+                
+                this._socket.on('error', (err) => {
+                    console.error("Socket error mapping openrouter python service:", err);
+                });
+                resolve();
+            } catch (err) {
+                console.error("Failed to connect to Python server:", err);
+                reject(err);
+            }
+        });
+        
+        return this._connectingPromise;
     }
 
     public async generateResponse(prompt: string, history: ChatMessage[]): Promise<string> {
@@ -14,68 +40,79 @@ export class OpenRouterService implements IAIClient {
     }
 
     public async generateStreamingResponse(prompt: string, history: ChatMessage[], onChunk: (chunk: string) => void): Promise<string> {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${this._apiKey}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "model": this._model,
-                "stream": true,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are Shanks, a helpful AI coding assistant inside VS Code. Provide concise and helpful answers for developers."
-                    },
-                    ...history.map(msg => ({
-                        role: msg.role,
-                        content: msg.content
-                    })),
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`OpenRouter API Error: ${errorData.error?.message || response.statusText}`);
+        if (!this._socket || this._socket.destroyed || this._socket.closed) {
+            await this._connectSocket();
         }
 
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-        let fullText = "";
+        if (!this._socket) {
+            throw new Error("Python OpenRouter socket could not be established");
+        }
 
-        if (!reader) throw new Error("Response body is not readable");
+        return new Promise((resolve, reject) => {
+            let fullText = "";
 
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+            const payload = JSON.stringify({
+                apiKey: this._apiKey,
+                model: this._model,
+                prompt: prompt,
+                history: history
+            }) + "\n";
 
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split("\n").filter(line => line.trim() !== "");
+            let dataBuffer = "";
 
-            for (const line of lines) {
-                if (line.startsWith("data: ")) {
-                    const data = line.slice(6);
-                    if (data === "[DONE]") break;
+            const dataListener = (data: Buffer) => {
+                dataBuffer += data.toString();
+                let boundary = dataBuffer.indexOf("\n");
+                
+                while (boundary !== -1) {
+                    const line = dataBuffer.slice(0, boundary).trim();
+                    dataBuffer = dataBuffer.slice(boundary + 1);
+                    boundary = dataBuffer.indexOf("\n");
+
+                    if (!line) continue;
+
                     try {
-                        const parsed = JSON.parse(data);
-                        const content = parsed.choices[0]?.delta?.content || "";
-                        if (content) {
-                            fullText += content;
-                            onChunk(content);
+                        const parsed = JSON.parse(line);
+                        if (parsed.error) {
+                            cleanup();
+                            reject(new Error(parsed.error));
+                            return;
+                        } else if (parsed.done) {
+                            cleanup();
+                            resolve(fullText);
+                            return;
+                        } else if (parsed.chunk) {
+                            fullText += parsed.chunk;
+                            onChunk(parsed.chunk);
                         }
                     } catch (e) {
-                        console.error("Error parsing stream chunk", e);
+                        console.error("Failed to parse socket chunk:", e);
                     }
                 }
-            }
-        }
+            };
 
-        return fullText;
+            const cleanup = () => {
+                this._socket?.removeListener('data', dataListener);
+                this._socket?.removeListener('error', errorListener);
+            };
+
+            const errorListener = (err: any) => {
+                cleanup();
+                reject(err);
+            };
+
+            this._socket!.on('data', dataListener);
+            this._socket!.on('error', errorListener);
+
+            this._socket!.write(payload);
+        });
+    }
+
+    public dispose() {
+        if (this._socket) {
+            this._socket.destroy();
+            this._socket = null;
+        }
+        this._connectingPromise = null;
     }
 }

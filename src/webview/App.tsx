@@ -105,7 +105,19 @@ export const App: React.FC = () => {
                     break;
 
                 case 'VOICE_TRANSCRIPT':
-                    setPartialTranscript(msg.text);
+                    if (msg.text) {
+                        setPartialTranscript(msg.text);
+                        if (msg.isFinal) {
+                            const userMsg: Message = {
+                                id: Date.now().toString(),
+                                role: 'user',
+                                text: msg.text,
+                                timestamp: Date.now(),
+                            };
+                            setMessages((prev) => [...prev, userMsg]);
+                            setPartialTranscript('');
+                        }
+                    }
                     break;
 
                 case 'DEEPGRAM_API_KEY':
@@ -159,6 +171,9 @@ export const App: React.FC = () => {
     const switchInteractionMode = (mode: InteractionMode) => {
         setInteractionMode(mode);
         vscode.postMessage({ type: 'MODE_CHANGE', mode });
+        if (mode !== 'agent') {
+            vscode.postMessage({ type: 'VOICE_MODE_DISABLED' });
+        }
     };
 
     const getModeHint = (): string => {

@@ -61,15 +61,33 @@ function handleExtensionMessage(msg: any) {
             break;
         case 'AI_CHUNK':
             appendAIText(msg.chunk);
+            voiceController?.feedPipelinedAudio(msg.chunk);
             break;
         case 'AI_END':
             updateAIText(msg.fullText);
-            // Speak the full response
-            voiceController?.speakAndReturn(msg.fullText);
+            voiceController?.finishPipelinedAudio();
             break;
         case 'ERROR':
             showError(msg.message);
             setState('idle');
+            break;
+        case 'CLOSE_TAB':
+            // Try to close the tab
+            try {
+                window.close();
+            } catch (e) {
+                console.log('[entry] Browser prevented window.close().');
+            }
+            // If window.close() fails (due to browser security on script-opened tabs), change UI
+            document.body.innerHTML = `
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; background-color: #0f172a; color: white;">
+                    <h1 style="margin-bottom: 1rem;">Voice Mode Disabled</h1>
+                    <p style="color: #94a3b8;">You can safely close this browser tab.</p>
+                </div>
+            `;
+            if (voiceController) {
+                voiceController.stop();
+            }
             break;
     }
 }
@@ -98,8 +116,9 @@ function initVoiceController(apiKey: string) {
         },
     });
 
-    // Auto-start listening
-    voiceController.start();
+    // The user must click the orb to start, satisfying the browser's autoplay policy.
+    log('[entry] Voice controller initialized. Waiting for user click to start.');
+    setState('idle');
 }
 
 // ─── UI Helpers ───────────────────────────────────────────────────────────────

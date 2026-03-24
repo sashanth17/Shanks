@@ -55,12 +55,16 @@ export class ShanksViewProvider implements vscode.WebviewViewProvider {
                 case 'REQUEST_DEEPGRAM_KEY':
                     await this._handleDeepgramKeyRequest();
                     break;
+                case 'VOICE_MODE_DISABLED':
+                    Logger.info('[ShanksViewProvider] Voice mode disabled. Closing browser tab.');
+                    this._voiceServer?.broadcast({ type: 'CLOSE_TAB' });
+                    break;
             }
         });
     }
 
     public handleTranscript(text: string, isFinal: boolean) {
-        this._postMessage({ type: 'VOICE_TRANSCRIPT', text });
+        this._postMessage({ type: 'VOICE_TRANSCRIPT', text, isFinal });
         
         if (isFinal) {
             this._handleMessage({
@@ -112,6 +116,9 @@ export class ShanksViewProvider implements vscode.WebviewViewProvider {
     private async _handleMessage(userMessage: Message) {
         if (!this._view) return;
 
+        // Add user message to history immediately so it shows up even if Voice Mode is toggled off
+        this._history.push({ role: 'user', content: userMessage.text });
+
         let apiKey = vscode.workspace.getConfiguration('shanks').get<string>('openRouterApiKey');
 
         if (!apiKey) {
@@ -146,14 +153,13 @@ export class ShanksViewProvider implements vscode.WebviewViewProvider {
 
             const fullText = await this._aiClient.generateStreamingResponse(
                 userMessage.text,
-                this._history,
+                this._history.slice(0, -1), // Send history EXCEPT the message we just added
                 (chunk) => {
                     this._postMessage({ type: 'AI_RESPONSE_CHUNK', id: assistantMessageId, chunk });
                     this._voiceServer?.broadcast({ type: 'AI_CHUNK', id: assistantMessageId, chunk });
                 }
             );
 
-            this._history.push({ role: 'user', content: userMessage.text });
             this._history.push({ role: 'assistant', content: fullText });
 
             Logger.info(`[ShanksViewProvider] AI response complete (id=${assistantMessageId}), ${fullText.length} chars.`);

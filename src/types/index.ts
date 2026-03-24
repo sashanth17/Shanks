@@ -36,7 +36,7 @@ export type ExtensionMessage =
     | { type: 'SPEAK_TEXT'; text: string }
     | { type: 'VOICE_URL'; url: string }
     | { type: 'VOICE_STATE'; state: VoiceState }
-    | { type: 'VOICE_TRANSCRIPT'; text: string };
+    | { type: 'VOICE_TRANSCRIPT'; text: string; isFinal?: boolean };
 
 /**
  * Messages sent FROM the Webview TO the Extension Host.
@@ -46,7 +46,8 @@ export type WebviewMessage =
     | { type: 'VOICE_TRANSCRIPT'; text: string }
     | { type: 'MODE_CHANGE'; mode: InteractionMode }
     | { type: 'REQUEST_DEEPGRAM_KEY' }
-    | { type: 'REQUEST_VOICE_URL' };
+    | { type: 'REQUEST_VOICE_URL' }
+    | { type: 'VOICE_MODE_DISABLED' };
 
 /** Voice pipeline state reported by the VoiceController to the UI. */
 export type VoiceState = 'idle' | 'listening' | 'ai_processing' | 'speaking';
