@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { OpenRouterService } from '../services/openrouter';
 import { IAIClient, Message, ChatMessage, WebviewMessage, ExtensionMessage } from '../types';
-import { Logger } from './logger';
+import { Logger } from './general_utils/logger';
 import { VoiceServer } from './voiceServer';
 
 export class ShanksViewProvider implements vscode.WebviewViewProvider {

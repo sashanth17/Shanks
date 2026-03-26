@@ -1,5 +1,5 @@
 import { ToolDefinition, ToolInput, ToolResult } from '../types';
-import { Logger } from '../extension/logger';
+import { Logger } from '../extension/general_utils/logger';
 
 /**
  * T5 — Tool Registry

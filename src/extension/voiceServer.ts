@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import express, { Request, Response } from 'express';
-import { Logger } from './logger';
+import { Logger } from './general_utils/logger';
 import { WsHandler } from '../voice/server/wsHandler';
 import type { WebSocket as WsClient, WebSocketServer as WssType } from 'ws';
 

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { Logger } from '../extension/logger';
+import { Logger } from '../extension/general_utils/logger';
 
 /**
  * T6 — Workspace Utilities

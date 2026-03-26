@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Logger } from '../extension/logger';
+import { Logger } from '../extension/general_utils/logger';
 import { registry } from './registry';
 import { PythonServerManager } from '../extension/pythonServer';
 

@@ -2,7 +2,7 @@ import type { WebSocket as WsSocket } from 'ws';
 import * as vscode from 'vscode';
 import { OpenRouterService } from '../../services/openrouter';
 import { IAIClient } from '../../types';
-import { Logger } from '../../extension/logger';
+import { Logger } from '../../extension/general_utils/logger';
 
 const WS_OPEN = 1; // WebSocket.OPEN
 

@@ -1,17 +1,13 @@
 import * as vscode from 'vscode';
 import { ShanksViewProvider } from './ShanksViewProvider';
-import { Logger } from './logger';
+import { Logger } from './general_utils/logger';
 import { VoiceServer } from './voiceServer';
-import { registerBuiltinTools } from '../tools/builtins';
 import { PythonServerManager } from './pythonServer';
-import { AgentBridgeDaemon } from './agentBridge';
+import { AgentBridgeDaemon } from './tools/core';
 
 export function activate(context: vscode.ExtensionContext) {
     // T3: Initialize logger and show activation message
     Logger.info('Shanks extension activating...');
-
-    // T5: Register built-in tools
-    registerBuiltinTools();
 
     // Boot Python Backend & Index complete Workspace into Vector DB
     PythonServerManager.getInstance().start(context.extensionUri).then(async () => {

@@ -3,7 +3,7 @@ import * as net from "net";
 import * as path from "path";
 import * as fs from "fs";
 import * as vscode from "vscode";
-import { Logger } from "./logger";
+import { Logger } from "./general_utils/logger";
 
 export class PythonServerManager {
     private static _instance: PythonServerManager;
